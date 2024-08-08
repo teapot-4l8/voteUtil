@@ -63,7 +63,9 @@ def go_vote(userId, uk):
     print(response.text)
     resp = json.loads(response.text)
     code = resp['code']
-    if code == -1:
+    if code == 0:
+        return flag
+    elif code == -1:
         raise Exception("投满了，下一个")
     else:
         flag = 1  # 接口返回异常，接口加密更新，程序需要终止更新
@@ -110,12 +112,12 @@ if "__main__" == __name__:
     file_path = "用户记录.json"
     user_data_generator = read_user_data()
     for fifty_times in range(99):  # 
-        # userId, uk = get_session_key()  # 从服务器获取用户
+        userId, uk = get_session_key()  # 从服务器获取用户
 
         # 从本地获取用户
-        data_turple = user_data_generator.__next__()
-        userId = data_turple[0]
-        uk = data_turple[1]
+        # data_turple = user_data_generator.__next__()
+        # userId = data_turple[0]
+        # uk = data_turple[1]
 
         for i in range(1,51):  # 一个用户有50票  TODO 刷到最大值自动下一个 这里不要定死50票
             print(f"已刷{i + fifty_times*50}票")
@@ -125,6 +127,7 @@ if "__main__" == __name__:
                 if flag:  # 出现异常
                     sys.exit()
             except:  # 投满，下一个用户
+                print("test")
                 break
 
     print("===========程序执行完毕==============")
