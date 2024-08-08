@@ -31,7 +31,7 @@ anniTime = int(time.time() * 1000)
 random_str = int(1e9 * random.random())
 
 data = {
-    'pId': '16221',  # 选手信息
+    'pId': '15656',  # 选手信息
     'userId': '3360485',  # 用户id
     'isQQ': 'false',  # 固定的
     'aFrom': '5',  # 固定的
