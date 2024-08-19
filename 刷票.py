@@ -5,6 +5,8 @@ import hashlib
 import json
 import datetime
 import sys
+import pymysql
+
 
 
 headers = {
@@ -48,7 +50,7 @@ def go_vote(userId, uk):
     random_str = int(1e9 * random.random())
 
     data = {
-        'pId': '15656',  # 选手信息
+        'pId': '21866',  # 选手信息
         'userId': userId,  # 用户id 和uk相关联 必须对应上
         'isQQ': 'false',  # 固定的
         'aFrom': '5',  # 固定的
@@ -57,7 +59,7 @@ def go_vote(userId, uk):
     }
 
     headers["annikey"] = encrypt_param(data)
-    headers["sk"] =  encrypt_param_new(data, uk)
+    headers["sk"] = encrypt_param_new(data, uk)
 
     response = requests.post('https://www.annikj.com/vote/elect/goVote.do', headers=headers, data=data)
     print(response.text)
@@ -70,11 +72,11 @@ def go_vote(userId, uk):
     else:
         flag = 1  # 接口返回异常，接口加密更新，程序需要终止更新
     return flag
-        
 
-def get_session_key():  
+
+def get_session_key():
     """
-    获取新用户并保存到json文件  TODO 改成保存到数据库
+    获取新用户并保存到数据库
     """
     data = {
         'code': '0b3wPuFa1nyiWH0cCtIa1x3oEg4wPuFV',
@@ -86,44 +88,73 @@ def get_session_key():
     response = requests.post('https://www.annikj.com/vote/user/getSessionKey.do', headers=headers, data=data)
     # print(response.text)
     response_data = json.loads(response.text)
-    f = open(file_path, mode="a+", encoding="utf-8")
-    json.dump(response_data, f)
-    f.write('\n')
-    f.close()
-    userId = response_data['data']['id']
+    # f = open(file_path, mode="a+", encoding="utf-8")
+    # json.dump(response_data, f)
+    # f.write('\n')
+    # f.close()
+    userId = str(response_data['data']['id'])
     uk = response_data['data']['uk']
+
+    try:
+        result = cursor.execute(f"INSERT INTO user_data (userId, uk) VALUES ('{userId}', '{uk}')")
+        conn.commit()
+    except:
+        print("数据写入失败")
+        conn.rollback()
+
     print(f"~~~~~~~~~~ 创建新用户 -*-{userId}-*-")
     print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
     return userId, uk
 
 
-def read_user_data():  # TODO 用数据库
-    with open(file_path, 'r', encoding='utf-8') as file:
-        for line in file:
-            data = json.loads(line)
-            data_id = data['data']['id']
-            data_uk =  data['data']['uk']
-            print(f"~~~~~~~~~~~ 读取用户 -*- {data_id} -*-")
-            yield data_id, data_uk
+# def read_user_data():
+#     with open(file_path, 'r', encoding='utf-8') as file:
+#         for line in file:
+#             data = json.loads(line)
+#             data_id = data['data']['id']
+#             data_uk =  data['data']['uk']
+#             print(f"~~~~~~~~~~~ 读取用户 -*- {data_id} -*-")
+#             yield data_id, data_uk
 
+def read_data_from_database():
+    cursor.execute("SELECT * FROM user_data")
+    result = cursor.fetchone()
+    # print(result)
+    return result
+    
+
+def user_vote_minus_one(userId):
+    try:
+        cursor.execute(f"UPDATE user_data SET remain_votes = remain_votes - 1 WHERE userId = '{userId}'")
+        conn.commit()
+    except:
+        conn.rollback()
 
 
 if "__main__" == __name__:
-    file_path = "用户记录.json"
-    user_data_generator = read_user_data()
+    # file_path = "用户记录.json"
+    # user_data_generator = read_user_data()
+    conn = pymysql.connect(host='127.0.0.1', port=3306, user='root', passwd='6666', db='dnfisreal')
+    cursor = conn.cursor()
+
     for fifty_times in range(99):  # 
-        userId, uk = get_session_key()  # 从服务器获取用户
+        # userId, uk = get_session_key()  # 从服务器新建用户
 
         # 从本地获取用户
         # data_turple = user_data_generator.__next__()
         # userId = data_turple[0]
         # uk = data_turple[1]
 
-        for i in range(1,51):  # 一个用户有50票  TODO 刷到最大值自动下一个 这里不要定死50票
+        # 从数据库获取用户
+        userId, uk, remain_vote_num = read_data_from_database()  # 从数据库中读取数据
+
+
+        for i in range(1,51):  # 一个用户有50票  
             print(f"已刷{i + fifty_times*50}票")
 
             try:
                 flag = go_vote(userId, uk)
+                user_vote_minus_one(userId)
                 if flag:  # 出现异常
                     sys.exit()
             except:  # 投满，下一个用户
@@ -131,4 +162,5 @@ if "__main__" == __name__:
                 break
 
     print("===========程序执行完毕==============")
-
+    cursor.close()
+    conn.close()

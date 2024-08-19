@@ -26,7 +26,7 @@
 
 ![image-20240807221310208](README.assets/image-20240807221310208.png)
 
-就是它了，有了它，我们就可以无限生成用户去投票了，桀桀桀桀桀桀桀桀桀桀桀桀桀桀桀桀桀桀桀桀桀桀桀桀（反派笑）
+就是它了，有了它，我们就可以无限生成用户去投票了，桀桀桀桀桀桀桀桀桀桀桀（反派笑）
 
 定睛一看，还有个code需要处理。
 
@@ -107,12 +107,6 @@ def encrypt_param(e):
     return hashlib.md5(a.encode()).hexdigest()
 ```
 
-
-
-
-
-
-
 # 微信开发者工具动态调试问题
 
 ## `app.json`不存在
@@ -189,14 +183,42 @@ def encrypt_param(e):
 
 ![image-20240806233611705](README.assets/image-20240806233611705.png)
 
+
 # 优化
 
 ## 上代理
 
-## 用户复用
+略
+
+
+## 数据库
 
 新建的那么多用户，第二天想再次使用，不新建了。
 
+数据库，启动！
+
+```
+net start mysql57
+mysql -u root -p
+6666
+```
+
+查看database
+
+```sql
+SHOW DATABASES;
+```
+
+使用 USE 命令选择你想查看的数据库
+
+```sql
+USE database_name;
+```
+
+要查看数据库中的所有表格，可以使用：
+```sql
+SHOW TABLES;
+```
 
 
 
