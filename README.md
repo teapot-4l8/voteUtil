@@ -220,6 +220,41 @@ USE database_name;
 SHOW TABLES;
 ```
 
+查看表格内容
+```sql
+SELECT * FROM user_data(表名)
+```
+
+
+增加数据
+```python
+    try:
+        result = cursor.execute(f"INSERT INTO user_data (userId, uk) VALUES ('{userId}', '{uk}')")
+        conn.commit()
+    except:
+        print("数据写入失败")
+        conn.rollback()
+```
+
+修改数据
+```python
+def user_vote_minus_one(userId):
+    try:
+        cursor.execute(f"UPDATE user_data SET remain_votes = remain_votes - 1 WHERE userId = '{userId}'")
+        conn.commit()
+    except:
+        conn.rollback()
+```
+
+查看数据
+```python
+def read_data_from_database():
+    cursor.execute("SELECT * FROM user_data")
+    result = cursor.fetchone()
+    # print(result)
+    return result
+```
+
 
 
 ## 多线程

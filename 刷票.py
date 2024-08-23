@@ -88,40 +88,22 @@ def get_session_key():
     response = requests.post('https://www.annikj.com/vote/user/getSessionKey.do', headers=headers, data=data)
     # print(response.text)
     response_data = json.loads(response.text)
-    # f = open(file_path, mode="a+", encoding="utf-8")
-    # json.dump(response_data, f)
-    # f.write('\n')
-    # f.close()
     userId = str(response_data['data']['id'])
     uk = response_data['data']['uk']
 
-    try:
-        result = cursor.execute(f"INSERT INTO user_data (userId, uk) VALUES ('{userId}', '{uk}')")
-        conn.commit()
-    except:
-        print("数据写入失败")
-        conn.rollback()
+    save_user_session_data(userId, uk)
 
     print(f"~~~~~~~~~~ 创建新用户 -*-{userId}-*-")
     print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
     return userId, uk
 
 
-# def read_user_data():
-#     with open(file_path, 'r', encoding='utf-8') as file:
-#         for line in file:
-#             data = json.loads(line)
-#             data_id = data['data']['id']
-#             data_uk =  data['data']['uk']
-#             print(f"~~~~~~~~~~~ 读取用户 -*- {data_id} -*-")
-#             yield data_id, data_uk
-
 def read_data_from_database():
-    cursor.execute("SELECT * FROM user_data")
+    cursor.execute("SELECT * FROM user_data WHERE remain_votes > 0")
     result = cursor.fetchone()
     # print(result)
     return result
-    
+
 
 def user_vote_minus_one(userId):
     try:
@@ -131,34 +113,63 @@ def user_vote_minus_one(userId):
         conn.rollback()
 
 
+def refresh_user_votes():
+    """
+    新的一天，票数全为50
+    """
+    try:
+        cursor.execute("UPDATE user_data SET remain_votes = 50")
+        conn.commit()
+    except:
+        conn.rollback()
+        print("fuck!")
+
+
+def set_user_votes_to_zero(userId):
+    try:
+        cursor.execute(f"UPDATE user_data SET remain_votes = 0 WHERE userId = '{userId}'")
+        conn.commit()
+    except:
+        conn.rollback()
+        print("fuck!")
+
+
+def save_user_session_data(userId, uk):
+    # TODO 服务器可能会重置用户数据 造成主键重复
+    # try:
+    result = cursor.execute(f"INSERT INTO user_data (userId, uk) VALUES ('{userId}', '{uk}')")
+    conn.commit()
+    # except Exception as e:
+    #     print(f"数据写入失败: {e}")
+    #     conn.rollback()
+
+
+
 if "__main__" == __name__:
-    # file_path = "用户记录.json"
-    # user_data_generator = read_user_data()
     conn = pymysql.connect(host='127.0.0.1', port=3306, user='root', passwd='6666', db='dnfisreal')
     cursor = conn.cursor()
 
-    for fifty_times in range(99):  # 
-        # userId, uk = get_session_key()  # 从服务器新建用户
+    # refresh_user_votes()  # 每天运行一次
 
-        # 从本地获取用户
-        # data_turple = user_data_generator.__next__()
-        # userId = data_turple[0]
-        # uk = data_turple[1]
+    for user_numbers in range(99):  # 
+        try:
+            userId, uk, remain_vote_num = read_data_from_database()
+        except TypeError:
+            print("哎呀，没人了，要去造人了")
+            userId, uk = get_session_key()
 
-        # 从数据库获取用户
-        userId, uk, remain_vote_num = read_data_from_database()  # 从数据库中读取数据
-
-
-        for i in range(1,51):  # 一个用户有50票  
-            print(f"已刷{i + fifty_times*50}票")
+        for i in range(1, remain_vote_num + 1):  # 一个用户有50票  
+            print(f"已刷{i + user_numbers*50}票")
 
             try:
                 flag = go_vote(userId, uk)
-                user_vote_minus_one(userId)
-                if flag:  # 出现异常
+                if flag:  # 出现异常 投票失败
                     sys.exit()
-            except:  # 投满，下一个用户
-                print("test")
+                    
+                user_vote_minus_one(userId)
+            except:  # 投满，下一个用户 
+                set_user_votes_to_zero(userId)
+                print(f"将用户{userId}剩余票数置零")
                 break
 
     print("===========程序执行完毕==============")
