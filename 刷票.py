@@ -8,7 +8,6 @@ import sys
 import pymysql
 
 
-
 headers = {
     'Host': 'www.annikj.com',
     'xweb_xhr': '1',
