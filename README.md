@@ -233,7 +233,15 @@ SELECT userId FROM user_data WHERE remain_votes = 0;
 
 This command will retrieve all the `userId` entries from the `user_data` table where the `remain_votes` column is equal to zero.
 
+To set `remain_votes` to zero for a specific `userId`, such as `'3587589'`, you can use the following SQL `UPDATE` command:
 
+```sql
+UPDATE user_data 
+SET remain_votes = 0 
+WHERE userId = '3587589';
+```
+
+This command updates the `remain_votes` column to `0` for the row where `userId` is `'3587589'`.
 
 
 增加数据
@@ -297,3 +305,213 @@ def read_data_from_database():
 这么快都不能满足你吗？别把服务器创死了 XD
 
 
+## 白嫖服务器部署
+
+开启终端
+```bash
+!pip install colab-xterm
+%load_ext colabxterm
+```
+
+```bash
+%xterm
+```
+
+
+To create a root user with a password and set up the MySQL environment in Google Colab, follow these steps:
+
+### 1. Install MySQL Server on Google Colab
+First, install MySQL server on your Colab environment:
+
+```bash
+!apt-get update
+!apt-get install -y mysql-server
+!service mysql start
+```
+
+### 2. Secure the MySQL Installation (Optional)
+This step ensures that MySQL is secured by setting up a root password and disabling remote root logins:
+
+```bash
+!mysql_secure_installation
+```
+
+During this setup, you'll be asked to set a root password. You can set it to `'6666'` or whatever you prefer.
+
+### 3. Set Up the Root User with Password `6666`
+If you want to explicitly create or set the root password to `6666` using MySQL commands:
+
+```bash
+!mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '6666'; FLUSH PRIVILEGES;"
+```
+
+### 4. Create a Database and a Table
+After setting up the root user, you can create the same environment as in your code snippet by creating a database and table.
+
+1. **Log into MySQL:**
+
+```bash
+!mysql -uroot -p6666
+```
+
+2. **Create the Database:**
+
+```sql
+CREATE DATABASE dnfisreal;
+```
+
+3. **Use the Database:**
+
+```sql
+USE dnfisreal;
+```
+
+4. **Create the `user_data` Table:**
+
+```sql
+CREATE TABLE user_data (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    userId VARCHAR(255) NOT NULL,
+    uk VARCHAR(255) NOT NULL,
+    remain_votes INT DEFAULT 50
+);
+```
+
+### 5. Populate the Table with Sample Data
+You can insert some sample data into the `user_data` table:
+
+```sql
+INSERT INTO user_data (userId, uk, remain_votes) 
+VALUES 
+('3587589', 'exampleUK1', 50),
+('1234567', 'exampleUK2', 0),
+('7654321', 'exampleUK3', 50);
+```
+
+### 6. Verify the Environment
+You can now verify that the environment is set up correctly by querying the data:
+
+```sql
+SELECT * FROM user_data;
+```
+
+### 7. Connect MySQL to Your Python Code
+Finally, ensure that your Python code in Colab is connected to MySQL using the same credentials:
+
+```python
+import pymysql
+
+DB_CONFIG = {
+    'host': '127.0.0.1',
+    'port': 3306,
+    'user': 'root',
+    'passwd': '6666',
+    'db': 'dnfisreal'
+}
+
+conn = pymysql.connect(**DB_CONFIG)
+cursor = conn.cursor()
+cursor.execute("SELECT * FROM user_data")
+results = cursor.fetchall()
+print(results)
+
+cursor.close()
+conn.close()
+```
+
+By following these steps, you should be able to replicate the MySQL environment as described in your code snippet on Google Colab.
+
+
+Importing and exporting MySQL data conveniently from the terminal can be done using MySQL's built-in tools. Here’s how you can perform these operations:
+
+### Exporting Data
+
+To export data from MySQL to a file (for backup or sharing), you can use the `mysqldump` command.
+
+#### 1. **Export a Single Table**
+
+To export a single table to a file:
+
+```bash
+mysqldump -u root -p6666 dnfisreal user_data > user_data_backup.sql
+```
+
+- `-u root`: Username for MySQL.
+- `-p6666`: Password for MySQL.
+- `dnfisreal`: Database name.
+- `user_data`: Table name.
+- `user_data_backup.sql`: Output file.
+
+#### 2. **Export the Entire Database**
+
+To export the entire database:
+
+```bash
+mysqldump -u root -p6666 dnfisreal > dnfisreal_backup.sql
+```
+
+### Importing Data
+
+To import data from a file into MySQL:
+
+#### 1. **Import a SQL File**
+
+To import data from a SQL file:
+
+```bash
+mysql -u root -p6666 dnfisreal < user_data_backup.sql
+```
+
+- `-u root`: Username for MySQL.
+- `-p6666`: Password for MySQL.
+- `dnfisreal`: Database name.
+- `user_data_backup.sql`: SQL file to import.
+
+#### 2. **Import Data from CSV**
+
+To import data from a CSV file, follow these steps:
+
+1. **Prepare the Table**: Ensure the table is set up correctly in MySQL.
+
+2. **Use the `LOAD DATA` Command**: Use the `LOAD DATA INFILE` command to import the CSV data.
+
+   ```sql
+   LOAD DATA INFILE '/path/to/user_data.csv'
+   INTO TABLE user_data
+   FIELDS TERMINATED BY ','
+   ENCLOSED BY '"'
+   LINES TERMINATED BY '\n'
+   IGNORE 1 ROWS;
+   ```
+
+   - `/path/to/user_data.csv`: Path to your CSV file.
+   - `FIELDS TERMINATED BY ','`: Indicates that fields in the CSV are separated by commas.
+   - `ENCLOSED BY '"'`: Specifies that fields may be enclosed in double quotes.
+   - `LINES TERMINATED BY '\n'`: Specifies the line termination character.
+
+### Tips
+
+- **File Permissions**: Ensure that the MySQL server has read permissions for the files you're importing.
+- **File Path**: For `LOAD DATA INFILE`, the file path should be accessible from the MySQL server's file system.
+
+### Example Workflow
+
+**Export Data:**
+
+```bash
+mysqldump -u root -p6666 dnfisreal user_data > /tmp/user_data_backup.sql
+```
+
+**View Exported Data:**
+
+```bash
+cat /tmp/user_data_backup.sql
+```
+
+**Import Data:**
+
+```bash
+mysql -u root -p6666 dnfisreal < /tmp/user_data_backup.sql
+```
+
+This process allows you to easily manage and transfer data between MySQL databases and files using the terminal.

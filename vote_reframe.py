@@ -91,7 +91,7 @@ def get_session_key():
 def read_data_from_database():
     conn = pymysql.connect(**DB_CONFIG)
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM user_data WHERE remain_votes > 0 ORDER BY RAND() LIMIT 3")
+    cursor.execute(f"SELECT * FROM user_data WHERE remain_votes > 0 ORDER BY RAND() LIMIT {thread_num}")
     results = cursor.fetchall()
     cursor.close()
     conn.close()
@@ -125,7 +125,6 @@ def lets_fucking_go(userId, uk):
                 flag = go_vote(userId, uk)
                 if flag:  # If there's an error, stop voting
                     return
-
             except Exception as e:
                 set_user_votes_to_zero(userId, cursor)
                 print(f"User {userId} has run out of votes")
@@ -133,9 +132,9 @@ def lets_fucking_go(userId, uk):
 
     except Exception as e:
         print(f"Error in lets_fucking_go for user {userId}: {e}")
-    
     finally:
         # Ensure resources are released properly
+        set_user_votes_to_zero(userId, cursor)
         cursor.close()
         conn.close()
 
@@ -144,11 +143,12 @@ def main():
     remain_local_user = True  # Local users still have votes
     thread_num = 10
 
-    user_data = read_data_from_database()
-    with ThreadPoolExecutor(max_workers=3) as executor:
+    user_data = read_data_from_database(thread_num)
+    with ThreadPoolExecutor(max_workers=thread_num) as executor:
         if remain_local_user:
             futures = [executor.submit(lets_fucking_go, userId, uk) for userId, uk, remain_vote_num in user_data]
         else:
+            remain_local_user = False
             print("No users left, creating new users...")
             futures = [executor.submit(lets_fucking_go, *get_session_key()) for _ in range(10)]
         
