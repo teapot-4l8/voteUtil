@@ -225,6 +225,16 @@ SHOW TABLES;
 SELECT * FROM user_data(表名)
 ```
 
+To select all the `userId` values from your `user_data` table where `remain_votes` equals zero, you can use the following SQL command:
+
+```sql
+SELECT userId FROM user_data WHERE remain_votes = 0;
+```
+
+This command will retrieve all the `userId` entries from the `user_data` table where the `remain_votes` column is equal to zero.
+
+
+
 
 增加数据
 ```python
@@ -274,6 +284,12 @@ def read_data_from_database():
 5. **性能考虑**: 在设计多线程数据库操作时，要考虑数据库的性能。并发操作可能会导致数据库性能瓶颈，需要合理设计和调整线程数量。
 
 遵循这些注意事项可以帮助确保在多线程环境下操作数据库时的数据完整性和性能。
+
+
+没执行完任务就结束
+
+在多线程环境中，主线程会等待所有子线程执行完毕后再结束。如果你的程序在主线程结束前就退出了，可能是因为子线程还在执行时主线程就已经结束了。这可能是由于主线程没有正确等待子线程完成的原因。
+你可以在主线程中使用`executor.shutdown(wait=True)`来等待所有线程执行完毕后再结束主线程。这样可以确保所有任务都被执行完毕。
 
 
 ## 协程
