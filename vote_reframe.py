@@ -4,10 +4,10 @@ import random
 import hashlib
 import json
 import datetime
-from concurrent.futures import ThreadPoolExecutor
 import pymysql
+from concurrent.futures import ThreadPoolExecutor
 
-# Database connection information
+# Database configuration
 DB_CONFIG = {
     'host': '127.0.0.1',
     'port': 3306,
@@ -16,7 +16,20 @@ DB_CONFIG = {
     'db': 'dnfisreal'
 }
 
-# Encryption functions
+
+headers = {
+    'Host': 'www.annikj.com',
+    'xweb_xhr': '1',
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 MicroMessenger/7.0.20.1781(0x6700143B) NetType/WIFI MiniProgramEnv/Windows WindowsWechat/WMPF WindowsWechat(0x6309092b)XWEB/11065',
+    'Accept': '*/*',
+    'Sec-Fetch-Site': 'cross-site',
+    'Sec-Fetch-Mode': 'cors',
+    'Sec-Fetch-Dest': 'empty',
+    'Referer': 'https://servicewechat.com/wx240722134f6877b1/61/page-frame.html',
+    'Accept-Language': 'zh-CN,zh;q=0.9',
+    'Content-Type': 'application/x-www-form-urlencoded',
+}
+
 def encrypt_param_new(e, n):
     t = list(e.keys())
     t.sort()
@@ -36,22 +49,20 @@ def encrypt_param(e):
     a += "key=" + "www.annikj.cn/vote/SECRET_KEY"
     return hashlib.md5(a.encode()).hexdigest()
 
-# Voting function
 def go_vote(userId, uk):
-    flag = 0  # Success or max votes reached
+    flag = 0  # 成功获取或投票数达到最大
     anniTime = int(time.time() * 1000)
     random_str = int(1e9 * random.random())
 
     data = {
-        'pId': '21866',  # Candidate information
-        'userId': userId,  # User ID, must correspond with UK
-        'isQQ': 'false',  # Fixed
-        'aFrom': '5',  # Fixed
+        'pId': '21866',  # 选手信息
+        'userId': userId,  # 用户id 和uk相关联 必须对应上
+        'isQQ': 'false',  # 固定的
+        'aFrom': '5',  # 固定的
         'anniTime': str(anniTime),
         'randomStr': random_str,
     }
 
-    headers = {}
     headers["annikey"] = encrypt_param(data)
     headers["sk"] = encrypt_param_new(data, uk)
 
@@ -64,10 +75,16 @@ def go_vote(userId, uk):
     elif code == -1:
         raise Exception("投满了，下一个")
     else:
-        flag = 1  # Interface returns an error, the encryption has changed
+        flag = 1  # 接口返回异常，接口加密更新，程序需要终止更新
     return flag
 
-# Session key function
+def save_user_session_data(userId, uk):
+    # TODO 服务器可能会重置用户数据 造成主键重复
+    conn = pymysql.connect(**DB_CONFIG)
+    cursor = conn.cursor()
+    result = cursor.execute(f"INSERT INTO user_data (userId, uk) VALUES ('{userId}', '{uk}')")
+    conn.commit()
+
 def get_session_key():
     data = {
         'code': '0b3wPuFa1nyiWH0cCtIa1x3oEg4wPuFV',
@@ -87,8 +104,7 @@ def get_session_key():
     print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
     return userId, uk
 
-# Read data from database
-def read_data_from_database():
+def read_data_from_database(thread_num):
     conn = pymysql.connect(**DB_CONFIG)
     cursor = conn.cursor()
     cursor.execute(f"SELECT * FROM user_data WHERE remain_votes > 0 ORDER BY RAND() LIMIT {thread_num}")
@@ -113,7 +129,6 @@ def set_user_votes_to_zero(userId, cursor):
         conn.rollback()
         print("Error updating user votes:", e)
 
-# Voting function executed by each thread
 def lets_fucking_go(userId, uk):
     conn = pymysql.connect(**DB_CONFIG)
     cursor = conn.cursor()
@@ -140,17 +155,20 @@ def lets_fucking_go(userId, uk):
 
 # Main function
 def main():
-    remain_local_user = True  # Local users still have votes
-    thread_num = 10
+    thread_num = 3
+    remain_local_user = False  # Local users still have votes
 
-    user_data = read_data_from_database(thread_num)
     with ThreadPoolExecutor(max_workers=thread_num) as executor:
+        # while True:
         if remain_local_user:
+            user_data = read_data_from_database(thread_num)
+            if not user_data:  # No more local users with votes
+                remain_local_user = False
+                # continue
             futures = [executor.submit(lets_fucking_go, userId, uk) for userId, uk, remain_vote_num in user_data]
         else:
-            remain_local_user = False
             print("No users left, creating new users...")
-            futures = [executor.submit(lets_fucking_go, *get_session_key()) for _ in range(10)]
+            futures = [executor.submit(lets_fucking_go, *get_session_key()) for _ in range(thread_num)]
         
         # Optionally wait for all threads to complete
         for future in futures:
@@ -158,8 +176,13 @@ def main():
                 future.result()
             except Exception as e:
                 print(f"Exception caught in future: {e}")
+        
+        # Exit the loop when no local users are left and get_session_key is done
+        # if not remain_local_user:
+        #     break
 
     print("=========== Program finished ==============")
 
 if __name__ == "__main__":
+    # refresh_user_votes() # 每天执行一次
     main()
