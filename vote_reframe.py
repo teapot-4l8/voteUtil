@@ -105,7 +105,7 @@ def refresh_user_votes():
     conn.close()
 
 # Set user votes to zero
-def set_user_votes_to_zero(userId, cursor):
+def set_user_votes_to_zero(userId, cursor, conn):
     try:
         cursor.execute(f"UPDATE user_data SET remain_votes = 0 WHERE userId = '{userId}'")
         conn.commit()
@@ -126,7 +126,7 @@ def lets_fucking_go(userId, uk):
                 if flag:  # If there's an error, stop voting
                     return
             except Exception as e:
-                set_user_votes_to_zero(userId, cursor)
+                set_user_votes_to_zero(userId, cursor, conn)
                 print(f"User {userId} has run out of votes")
                 break
 
@@ -134,7 +134,7 @@ def lets_fucking_go(userId, uk):
         print(f"Error in lets_fucking_go for user {userId}: {e}")
     finally:
         # Ensure resources are released properly
-        set_user_votes_to_zero(userId, cursor)
+        set_user_votes_to_zero(userId, cursor, conn)
         cursor.close()
         conn.close()
 
