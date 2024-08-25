@@ -41,6 +41,19 @@ def go_vote(userId, uk):
     flag = 0  # Success or max votes reached
     anniTime = int(time.time() * 1000)
     random_str = int(1e9 * random.random())
+    
+    headers = {
+        'Host': 'www.annikj.com',
+        'xweb_xhr': '1',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 MicroMessenger/7.0.20.1781(0x6700143B) NetType/WIFI MiniProgramEnv/Windows WindowsWechat/WMPF WindowsWechat(0x6309092b)XWEB/11065',
+        'Accept': '*/*',
+        'Sec-Fetch-Site': 'cross-site',
+        'Sec-Fetch-Mode': 'cors',
+        'Sec-Fetch-Dest': 'empty',
+        'Referer': 'https://servicewechat.com/wx240722134f6877b1/61/page-frame.html',
+        'Accept-Language': 'zh-CN,zh;q=0.9',
+        'Content-Type': 'application/x-www-form-urlencoded',
+    }
 
     data = {
         'pId': '21866',  # Candidate information
@@ -51,7 +64,6 @@ def go_vote(userId, uk):
         'randomStr': random_str,
     }
 
-    headers = {}
     headers["annikey"] = encrypt_param(data)
     headers["sk"] = encrypt_param_new(data, uk)
 
