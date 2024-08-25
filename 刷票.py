@@ -31,7 +31,6 @@ def encrypt_param_new(e, n):
         a += "key=" + n
     return hashlib.md5(a.encode()).hexdigest()
 
-
 def encrypt_param(e):
     t = list(e.keys())
     t.sort()
@@ -40,8 +39,6 @@ def encrypt_param(e):
         a += u + "=" + str(e[u]) + "&"
     a += "key=" + "www.annikj.cn/vote/SECRET_KEY"
     return hashlib.md5(a.encode()).hexdigest()
-
-
 
 def go_vote(userId, uk):
     flag = 0  # 成功获取或投票数达到最大
@@ -71,7 +68,6 @@ def go_vote(userId, uk):
     else:
         flag = 1  # 接口返回异常，接口加密更新，程序需要终止更新
     return flag
-
 
 def get_session_key():
     """
