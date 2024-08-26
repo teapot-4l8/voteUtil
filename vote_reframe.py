@@ -136,7 +136,7 @@ def lets_fucking_go(userId, uk):
         code = go_vote(userId, uk)
         if code:  # If there's an error, stop voting
             print(f"{userId}接口异常:uk={uk}")
-            sys.exit()
+            sys.exit()  # TODO 这个没用 换一种方案
         elif code == 0:
              print(f"User {userId} has voted {i + 1} times")
         else:
