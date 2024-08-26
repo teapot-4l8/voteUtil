@@ -319,6 +319,17 @@ def read_data_from_database():
 %xterm
 ```
 
+运行
+```
+python vote_reframe.py
+```
+
+更新
+```
+cd voteUtil
+git remote update
+```
+
 以下是技术细节，非常好代码，爱来自chatgpt
 
 To create a root user with a password and set up the MySQL environment in Google Colab, follow these steps:

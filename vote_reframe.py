@@ -132,7 +132,7 @@ def lets_fucking_go(userId, uk):
     conn = pymysql.connect(**DB_CONFIG)
     cursor = conn.cursor()
 
-    for i in range(5):  # Each user has 50 votes
+    for i in range(50):  # Each user has 50 votes
         code = go_vote(userId, uk)
         if code:  # If there's an error, stop voting
             print(f"{userId}接口异常:uk={uk}")
@@ -149,31 +149,31 @@ def lets_fucking_go(userId, uk):
 
 # Main function
 def main():
-    thread_num = 3
+    thread_num = 10
     remain_local_user = True  # Local users still have votes
 
     with ThreadPoolExecutor(max_workers=thread_num) as executor:
-        # while True:
-        if remain_local_user:
-            user_data = read_data_from_database(thread_num)
-            if not user_data:  # No more local users with votes
-                remain_local_user = False
-                # continue
-            futures = [executor.submit(lets_fucking_go, userId, uk) for userId, uk, remain_vote_num in user_data]
-        else:
-            print("No users left, creating new users...")
-            futures = [executor.submit(lets_fucking_go, *get_session_key()) for _ in range(thread_num)]
-        
-        # Optionally wait for all threads to complete
-        for future in futures:
-            try:
-                future.result()
-            except Exception as e:
-                print(f"Exception caught in future: {e}")
-        
+        while True:
+            if remain_local_user:
+                user_data = read_data_from_database(thread_num)
+                if not user_data:  # No more local users with votes
+                    remain_local_user = False
+                    # continue
+                futures = [executor.submit(lets_fucking_go, userId, uk) for userId, uk, remain_vote_num in user_data]
+            # else:
+            #     print("No users left, creating new users...")
+            #     futures = [executor.submit(lets_fucking_go, *get_session_key()) for _ in range(thread_num)]
+            
+            # Optionally wait for all threads to complete
+            for future in futures:
+                try:
+                    future.result()
+                except Exception as e:
+                    print(f"Exception caught in future: {e}")
+            
         # Exit the loop when no local users are left and get_session_key is done
-        # if not remain_local_user:
-        #     break
+        if not remain_local_user:
+            break
 
     print("=========== Program finished ==============")
 
