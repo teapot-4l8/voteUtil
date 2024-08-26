@@ -57,7 +57,7 @@ def go_vote(userId, uk):
     random_str = int(1e9 * random.random())
 
     data = {
-        'pId': '21866',  # 选手信息
+        'pId': '15656',  # 选手信息
         'userId': userId,  # 用户id 和uk相关联 必须对应上
         'isQQ': 'false',  # 固定的
         'aFrom': '5',  # 固定的
@@ -84,7 +84,7 @@ def save_user_session_data(userId, uk):
     result = cursor.execute(f"INSERT INTO user_data (userId, uk) VALUES ('{userId}', '{uk}')")
     conn.commit()
 
-def get_session_key():
+def get_session_key():  # TODO 一旦走到了这里就是永远while下去直到服务器挂掉 有点危险 记得设置一个终值
     data = {
         'code': '0b3wPuFa1nyiWH0cCtIa1x3oEg4wPuFV',
         'scene': '1001',
@@ -171,9 +171,9 @@ def main():
                 except Exception as e:
                     print(f"Exception caught in future: {e}")
             
-        # Exit the loop when no local users are left and get_session_key is done
-        if not remain_local_user:
-            break
+            # Exit the loop when no local users are left and get_session_key is done
+            if not remain_local_user:
+                break
 
     print("=========== Program finished ==============")
 
