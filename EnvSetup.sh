@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# Variables
+DB_USER="root"
+DB_PASS="6666"
+DB_NAME="dnfisreal"
+BACKUP_FILE="dnfisreal_backup.sql"
+
 # Install pymysql using pip
 pip install pymysql
 
@@ -10,7 +16,13 @@ apt-get -y install mysql-server
 service mysql start
 
 # Change MySQL root user password and flush privileges
-mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '6666'; FLUSH PRIVILEGES;"
+mysql -e "ALTER USER '$DB_USER'@'localhost' IDENTIFIED WITH mysql_native_password BY '$DB_PASS'; FLUSH PRIVILEGES;"
+
+# Create a new database
+mysql -u$DB_USER -p$DB_PASS -e "CREATE DATABASE $DB_NAME;"
+
+# Use the new database and import data from the backup file
+mysql -u$DB_USER -p$DB_PASS $DB_NAME < $BACKUP_FILE
 
 # Install colab-xterm using pip
 pip install colab-xterm

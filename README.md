@@ -459,7 +459,7 @@ To import data from a file into MySQL:
 To import data from a SQL file:
 
 ```bash
-mysql -u root -p6666 dnfisreal < user_data_backup.sql
+mysql -u root -p6666 dnfisreal < dnfisreal_backup.sql
 ```
 
 - `-u root`: Username for MySQL.
@@ -543,11 +543,14 @@ echo "All tasks completed successfully."
 ### run:
 
 ```
+!git clone https://github.com/teapot-4l8/voteUtil.git
+
+cd voteUtil/
+
 chmod +x EnvSetup.sh
 
-./EnvSetup.sh
+!./EnvSetup.sh
 
 %load_ext colabxterm
-
 %xterm
 ```
