@@ -46,7 +46,7 @@ def go_vote(userId, uk):
     random_str = int(1e9 * random.random())
 
     data = {
-        'pId': '21866',  # 选手信息
+        'pId': '15656',  # 选手信息
         'userId': userId,  # 用户id 和uk相关联 必须对应上
         'isQQ': 'false',  # 固定的
         'aFrom': '5',  # 固定的

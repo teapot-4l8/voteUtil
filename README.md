@@ -307,16 +307,19 @@ def read_data_from_database():
 
 ## 白嫖服务器部署
 
-开启终端
-```bash
-!pip install colab-xterm
-%load_ext colabxterm
+### run:
+
+```
+!git clone https://github.com/teapot-4l8/voteUtil.git; cd voteUtil/; chmod +x EnvSetup.sh; ./EnvSetup.sh
 ```
 
+开启终端
 ```bash
+%load_ext colabxterm
 %xterm
 ```
 
+以下是技术细节，非常好代码，爱来自chatgpt
 
 To create a root user with a password and set up the MySQL environment in Google Colab, follow these steps:
 
@@ -540,17 +543,3 @@ pip install colab-xterm
 echo "All tasks completed successfully."
 ```
 
-### run:
-
-```
-!git clone https://github.com/teapot-4l8/voteUtil.git
-
-cd voteUtil/
-
-chmod +x EnvSetup.sh
-
-!./EnvSetup.sh
-
-%load_ext colabxterm
-%xterm
-```
