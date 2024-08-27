@@ -334,7 +334,7 @@ git remote update
 
 每天执行一次刷新数据库
 ```
-
+./exc_every_day.sh
 ```
 
 

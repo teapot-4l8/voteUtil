@@ -18,7 +18,6 @@ DB_CONFIG = {
 }
 
 
-
 def encrypt_param_new(e, n):
     t = list(e.keys())
     t.sort()
@@ -64,8 +63,6 @@ def go_vote(userId, uk):
         'anniTime': str(anniTime),
         'randomStr': random_str,
     }
-
-
     headers["annikey"] = encrypt_param(data)
     headers["sk"] = encrypt_param_new(data, uk)
 
@@ -147,38 +144,30 @@ def lets_fucking_go(userId, uk):
 
 # Main function
 def main():
-    t1 = time.time()
-    print(str(t1) + ' %%')
-
     thread_num = 3
     remain_local_user = True  # Local users still have votes
 
     with ThreadPoolExecutor(max_workers=thread_num) as executor:
-        if remain_local_user:
-            user_data = read_data_from_database(thread_num)
-            if not user_data:  # No more local users with votes
-                remain_local_user = False
-                # continue
-            futures = [executor.submit(lets_fucking_go, userId, uk) for userId, uk, remain_vote_num in user_data]
-        # else:
-        #     print("No users left, creating new users...")
-        #     futures = [executor.submit(lets_fucking_go, *get_session_key()) for _ in range(thread_num)]
-        
-        for future in futures:
-            try:
-                future.result()
-            except Exception as e:
-                print(f"Exception caught in future: {e}")
+        while True:
+            if remain_local_user:
+                user_data = read_data_from_database(thread_num)
+                if not user_data:  # No more local users with votes
+                    remain_local_user = False
+                    # continue
+                futures = [executor.submit(lets_fucking_go, userId, uk) for userId, uk, remain_vote_num in user_data]
+            # else:
+            #     print("No users left, creating new users...")
+            #     futures = [executor.submit(lets_fucking_go, *get_session_key()) for _ in range(thread_num)]
             
-
-
+            for future in futures:
+                try:
+                    future.result()
+                except Exception as e:
+                    print(f"Exception caught in future: {e}")
+                
     print("=========== Program finished ==============")
-    t2 = time.time()
-    print(str(t2) + ' %%')
-    t = t2 - t1
-    print('==> ' + str(t))
 
 
 if __name__ == "__main__":
-    # refresh_user_votes() # 每天执行一次
+    # refresh_user_votes() # 每天执行一次 或者执行 exc_every_day.sh
     main()
