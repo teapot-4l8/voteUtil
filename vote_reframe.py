@@ -136,7 +136,7 @@ def lets_fucking_go(userId, uk):
             break
         else:
             print(f"{userId}接口异常:uk={uk}")
-            # sys.exit()  # TODO 这个没用 换一种方案
+            sys.exit()  # 只会让它的线程终止
 
     set_user_votes_to_zero(userId, cursor, conn)
     cursor.close()

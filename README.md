@@ -455,7 +455,7 @@ To export data from MySQL to a file (for backup or sharing), you can use the `my
 To export a single table to a file:
 
 ```bash
-mysqldump -u root -p6666 dnfisreal user_data > user_data_backup.sql
+mysqldump -u root -p6666 dnfisreal user_data > dnfisreal_backup.sql
 ```
 
 - `-u root`: Username for MySQL.
