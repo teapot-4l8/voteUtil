@@ -1,5 +1,7 @@
 前言：`app.json`文件不存在，有没有大佬有更好的解决办法？欢迎师傅们在评论区指点江山 :P
 
+if -1 居然为 true，坑死我了 :(
+
 # 注册账号
 
 注册了之后没有地方注销，挺烦的。
@@ -330,6 +332,12 @@ cd voteUtil
 git remote update
 ```
 
+每天执行一次刷新数据库
+```
+
+```
+
+
 以下是技术细节，非常好代码，爱来自chatgpt
 
 To create a root user with a password and set up the MySQL environment in Google Colab, follow these steps:
@@ -567,3 +575,8 @@ echo "All tasks completed successfully."
 
 ```
 
+# 战绩
+
+10个线程 10个用户 10票 2s
+
+50票/s

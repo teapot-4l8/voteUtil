@@ -73,9 +73,7 @@ def go_vote(userId, uk):
     print(response.text)
     resp = json.loads(response.text)
     code = resp['code']
-    if code in (0, -1): 
-        return code
-    return 1  # 接口返回异常
+    return code
 
 def save_user_session_data(userId, uk):
     # TODO 服务器可能会重置用户数据 造成主键重复
@@ -132,16 +130,16 @@ def lets_fucking_go(userId, uk):
     conn = pymysql.connect(**DB_CONFIG)
     cursor = conn.cursor()
 
-    for i in range(50):  # Each user has 50 votes
+    for i in range(10):  # Each user has 50 votes
         code = go_vote(userId, uk)
-        if code:  # If there's an error, stop voting
-            print(f"{userId}接口异常:uk={uk}")
-            sys.exit()  # TODO 这个没用 换一种方案
-        elif code == 0:
-             print(f"User {userId} has voted {i + 1} times")
-        else:
+        if code == 0:
+            print(f"User {userId} has voted {i + 1} times")
+        elif code == -1:
             print(f"User {userId} has run out of votes")
-            set_user_votes_to_zero(userId, cursor, conn)
+            break
+        else:
+            print(f"{userId}接口异常:uk={uk}")
+            # sys.exit()  # TODO 这个没用 换一种方案
 
     set_user_votes_to_zero(userId, cursor, conn)
     cursor.close()
@@ -149,33 +147,37 @@ def lets_fucking_go(userId, uk):
 
 # Main function
 def main():
-    thread_num = 10
+    t1 = time.time()
+    print(str(t1) + ' %%')
+
+    thread_num = 3
     remain_local_user = True  # Local users still have votes
 
     with ThreadPoolExecutor(max_workers=thread_num) as executor:
-        while True:
-            if remain_local_user:
-                user_data = read_data_from_database(thread_num)
-                if not user_data:  # No more local users with votes
-                    remain_local_user = False
-                    # continue
-                futures = [executor.submit(lets_fucking_go, userId, uk) for userId, uk, remain_vote_num in user_data]
-            # else:
-            #     print("No users left, creating new users...")
-            #     futures = [executor.submit(lets_fucking_go, *get_session_key()) for _ in range(thread_num)]
+        if remain_local_user:
+            user_data = read_data_from_database(thread_num)
+            if not user_data:  # No more local users with votes
+                remain_local_user = False
+                # continue
+            futures = [executor.submit(lets_fucking_go, userId, uk) for userId, uk, remain_vote_num in user_data]
+        # else:
+        #     print("No users left, creating new users...")
+        #     futures = [executor.submit(lets_fucking_go, *get_session_key()) for _ in range(thread_num)]
+        
+        for future in futures:
+            try:
+                future.result()
+            except Exception as e:
+                print(f"Exception caught in future: {e}")
             
-            # Optionally wait for all threads to complete
-            for future in futures:
-                try:
-                    future.result()
-                except Exception as e:
-                    print(f"Exception caught in future: {e}")
-            
-            # Exit the loop when no local users are left and get_session_key is done
-            if not remain_local_user:
-                break
+
 
     print("=========== Program finished ==============")
+    t2 = time.time()
+    print(str(t2) + ' %%')
+    t = t2 - t1
+    print('==> ' + str(t))
+
 
 if __name__ == "__main__":
     # refresh_user_votes() # 每天执行一次
