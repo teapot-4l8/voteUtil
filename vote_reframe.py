@@ -6,7 +6,7 @@ import hashlib
 import json
 import datetime
 import pymysql
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # Database configuration
 DB_CONFIG = {
@@ -16,6 +16,11 @@ DB_CONFIG = {
     'passwd': '6666',
     'db': 'dnfisreal'
 }
+
+class APIError(Exception):
+    """Custom exception to signal a critical error requiring program termination."""
+    # print("FUCK FUCK FUCK")
+    pass
 
 
 def encrypt_param_new(e, n):
@@ -132,11 +137,13 @@ def lets_fucking_go(userId, uk):
         if code == 0:
             print(f"User {userId} has voted {i + 1} times")
         elif code == -1:
+            # 防止意外中断时继续投票导致超过票数
             print(f"User {userId} has run out of votes")
             break
         else:
             print(f"{userId}接口异常:uk={uk}")
-            sys.exit()  # 只会让它的线程终止
+            raise APIError(f"API error in user {userId} with uk={uk}")
+
 
     set_user_votes_to_zero(userId, cursor, conn)
     cursor.close()
@@ -159,11 +166,13 @@ def main():
             #     print("No users left, creating new users...")
             #     futures = [executor.submit(lets_fucking_go, *get_session_key()) for _ in range(thread_num)]
             
-            for future in futures:
-                try:
+            try:
+                for future in as_completed(futures):
                     future.result()
-                except Exception as e:
-                    print(f"Exception caught in future: {e}")
+            except APIError:
+                # print("Terminating all threads due to a critical error.")
+                executor.shutdown(wait=False)  # Immediately shut down the executor
+                sys.exit(1)  # Exit the entire program
                 
     print("=========== Program finished ==============")
 
