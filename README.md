@@ -190,16 +190,19 @@ def encrypt_param(e):
 
 ## 上代理
 
-略
+用redis作为缓存，详见proxy文件夹
+
 
 
 ## 数据库
 
+### MySQL
+
 新建的那么多用户，第二天想再次使用，不新建了。
 
-数据库，启动！
+mysql，启动！
 
-```
+```bash
 net start mysql57
 mysql -u root -p
 6666
@@ -275,6 +278,11 @@ def read_data_from_database():
     return result
 ```
 
+一开始想的是用Mysql，过了几天才反应过来这种场景下应该用Redis更合适
+
+### Redis
+
+读写速度快，用于高并发场景，用于分布式爬虫。
 
 
 ## 多线程
@@ -306,8 +314,9 @@ def read_data_from_database():
 
 这么快都不能满足你吗？别把服务器创死了 XD
 
-
 ## 白嫖服务器部署
+
+使用colab
 
 ### run:
 
@@ -472,7 +481,7 @@ To export the entire database:
 mysqldump -u root -p6666 dnfisreal > dnfisreal_backup.sql
 ```
 
-### Importing Data
+### *Importing Data*
 
 To import data from a file into MySQL:
 

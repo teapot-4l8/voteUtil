@@ -145,28 +145,28 @@ if "__main__" == __name__:
     cursor = conn.cursor()
 
     # refresh_user_votes()  # 每天运行一次
-
-    for user_numbers in range(99):  # 
-        try:
-            userId, uk, remain_vote_num = read_data_from_database()
-        except TypeError:
-            print("哎呀，没人了，要去造人了")
-            userId, uk = get_session_key()
-
-        for i in range(1, remain_vote_num + 1):  # 一个用户有50票  
-            print(f"已刷{i + user_numbers*50}票")
-
-            try:
-                flag = go_vote(userId, uk)
-                if flag:  # 出现异常 投票失败
-                    sys.exit()
-                    
-                user_vote_minus_one(userId)
-            except:  # 投满，下一个用户 
-                set_user_votes_to_zero(userId)
-                print(f"将用户{userId}剩余票数置零")
-                break
-
-    print("===========程序执行完毕==============")
-    cursor.close()
-    conn.close()
+    print(get_session_key())
+    # for user_numbers in range(99):  #
+    #     try:
+    #         userId, uk, remain_vote_num = read_data_from_database()
+    #     except TypeError:
+    #         print("哎呀，没人了，要去造人了")
+    #         userId, uk = get_session_key()
+    #
+    #     for i in range(1, remain_vote_num + 1):  # 一个用户有50票
+    #         print(f"已刷{i + user_numbers*50}票")
+    #
+    #         try:
+    #             flag = go_vote(userId, uk)
+    #             if flag:  # 出现异常 投票失败
+    #                 sys.exit()
+    #
+    #             user_vote_minus_one(userId)
+    #         except:  # 投满，下一个用户
+    #             set_user_votes_to_zero(userId)
+    #             print(f"将用户{userId}剩余票数置零")
+    #             break
+    #
+    # print("===========程序执行完毕==============")
+    # cursor.close()
+    # conn.close()

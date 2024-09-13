@@ -2,9 +2,7 @@ import requests
 
 headers = {
     'Connection': 'keep-alive',
-    # 'annikey': '46a27fedaae1873763e10f36e4d12f6e',
     'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 10_3_1 like Mac OS X) AppleWebKit/603.1.3 (KHTML, like Gecko) Version/10.0 Mobile/14E304 Safari/602.1 wechatdevtools/1.06.2209190 MicroMessenger/8.0.5 Language/zh_CN webview/',
-    # 'sk': '4ca18933ef7797a3ebcb874336ea55f3',
     'content-type': 'application/x-www-form-urlencoded',
     'Accept': '*/*',
     'Sec-Fetch-Site': 'cross-site',
